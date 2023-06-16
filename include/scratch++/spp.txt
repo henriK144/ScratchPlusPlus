@@ -1,0 +1,53 @@
+Scratch++ is a game engine library built on top of the SDL2 API. Its name is a portmanteau of MIT's drag-and-drop programming language Scratch, which served as the inspiration for many of the features, and C++, the language it is implemented in.
+I developed it out of the pseudo "game engine" created to run Untitled Relativity Game after realizing in retrospect
+that it was horribly designed, inefficient, leaked copious amounts of memory, and lacked several useful features. 
+A lot of the designs were inspired by Robert Nystrom's book "Game Programming Patterns", which you should read if you're interested in game programming as well ().
+
+Scratch++ provides the facilities to create game images and objects out of png files, play sounds from wav files,
+create a window for a game, and display objects to said window. It also supplies classes for organizing audio and sprite collections, adding arbitrary scripting to an entity, organizing visible game objects into layers, and broadcasting messages 
+from one part of a game into another.
+
+The library is contained in the namespace SPP, and is documented (to some extent) in the header files.
+To use Scratch++ to make a game (note that it is still being developed so that might not be a good idea yet), follow these steps:
+
+0. Set up a C++ development environment and configure the compiler to C++17 or later.
+1. Install SDL2 into your development environment, either from here () or by following an online tutorial such as this one ().
+2. Copy/Download the folders include and src into your working directory, reconfiguring your build command to find them if needed.
+3. Add another folder for resources like png and wav files for visual and sound assets.
+4. Write the following functions or something equivalent into main.cpp:
+
+void sdl_setup()
+{
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) > 0)
+		std::cout << "SDL SYSTEM FAILURE. ERROR: " << SDL_GetError() << '\n';
+	if (!(IMG_Init(IMG_INIT_PNG)))
+		std::cout << "SDL IMAGE FAILURE. ERROR: " << SDL_GetError() << '\n';
+	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+    	std::cout << "SDL AUDIO FAILURE. ERROR: " << Mix_GetError() << '\n';
+    if (TTF_Init() < 0)
+		std::cout << "SDL FONT FAILURE. ERROR:" << TTF_GetError() << '\n';
+}
+
+void sdl_takedown()
+{
+	TTF_Quit();
+	Mix_Quit();
+	IMG_Quit();
+	SDL_Quit();
+}
+
+5. Make a class that inherits from SPP::Game and adds whatever game variables, assets, and entities you want as its members.
+If you want the entities to do anything interesting, you should also define components that inherit from the classes in
+SPP::Component. For modularity purposes, it's best to place these in separate files.
+6. Call sdl_setup(), create an instance of your game class and call play() on it, then call sdl_takedown() in that order. 
+If the previous steps were done correctly, and MyGame is a class that inherits from SPP::Game and implements its virtual destructor, then the following should be a minimal SPP program:
+
+int main(int argc, char* args[])
+{
+	sdl_setup();
+	MyGame mygame; 
+	mygame.play()
+	sdl_takedown();
+
+	return 0;
+}
